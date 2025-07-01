@@ -15,6 +15,9 @@ Yes. If you want to verify that there's no payment processing or request for pay
 
 There are two reasons. First, I use yt-dlp frequently, and it can be tedious to remember and retype the same parameters every time. Second, I thought this project would be complex enough to challenge my Lua skills. When I created this application, I had only built a few small programs—a tax calculator, a word scrambler, and a number-guessing game.
 
+## You're replacing a cli with... another cli?
+Yes, but from what I understand, creating UI windows requires an additional Lua library. I believe I should focus on mastering the core functionality first before tackling that challenge. In other words, this CLI application is a stepping stone toward eventually developing a GUI version.
+
 ## Will you accept push requests?
 
 It depends. Since this program is meant to test my Lua skills, I prefer not to rely on others' code when possible. If a pull request adds features I could implement myself, it probably won't be accepted. However, I may accept fixes for overlooked issues or more efficient implementations of existing functions. In general, I'd prefer if you opened an issue first instead.
