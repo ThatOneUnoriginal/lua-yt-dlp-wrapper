@@ -4,6 +4,11 @@ local extractionParametersCategory
 local welcome
 local website
 
+-- Cache tables
+local commandFileCache = {} -- For storing command file contents
+local urlValidationCache = {} -- For storing URL validation results
+
+-- This function handles the actual execution of the yt-dlp, the final function before it loops to welcome() or exits program
 local function execution(parametersSelected, website)
     local parameters = table.concat(parametersSelected, " ")
 
@@ -11,7 +16,7 @@ local function execution(parametersSelected, website)
 
     if success then
         print("Execution finished successfully!")
-        print("\nDo you wish to execute again?")
+        print("\nDo you wish to execute again? (y/n)")
         local choice = io.read()
         if choice ~= "y" and choice ~= "n" then
             print("Please input either y or n.")
@@ -25,20 +30,24 @@ local function execution(parametersSelected, website)
     end
 end
 
+-- This function handles the parameter selection by the user including adding and deletion tp parametersSelected
 local function parameterSelection(sectionChoice)
-    local file = io.open("data/command" .. sectionChoice .. ".md", "r")
-    if not file then
-        print(
-            "Failed to read 'command" ..
-                sectionChoice ..
-                    ".md'.\n" .. "Please make sure the file exists in the 'data' subfolder and is named correctly."
-        )
-        return -- Exit the function if file is missing
+    -- Check cache first
+    if not commandFileCache[sectionChoice] then
+        local file = io.open("data/command" .. sectionChoice .. ".md", "r")
+        if not file then
+            print(
+                "Failed to read 'command" ..
+                    sectionChoice ..
+                        ".md'.\n" .. "Please make sure the file exists in the 'data' subfolder and is named correctly."
+            )
+            return
+        end
+        commandFileCache[sectionChoice] = file:read("*a")
+        file:close()
     end
 
-    local content = file:read("*a")
-    file:close()
-    print("\n" .. content .. "\n")
+    print("\n" .. commandFileCache[sectionChoice] .. "\n")
 
     repeat
         print("Input which parameters you want to use from this list.")
@@ -75,32 +84,51 @@ local function parameterSelection(sectionChoice)
     until false
 end
 
--- Function to check if a URL is valid and not DRM-protected
+-- This function validates the URL inputted
 local function urlValidation(website)
+
+    -- Check cache first
+    if urlValidationCache[website] then
+        return urlValidationCache[website]
+    end
+
+    -- This parases the URL with LuaSocket (depedency)
+    -- Invalid means LuaSocket coudln't parse the URL
     local parsed = url.parse(website)
     if not (parsed and parsed.scheme and parsed.host) then
+        urlValidationCache[website] = "invalid"
         return "invalid"
     end
 
+    --- This simulates a yt-dlp execution using the URL
     local handle = io.popen("yt-dlp -s " .. website .. " 2>&1")
     local result = handle:read("*a")
     handle:close()
 
+    local status
+    -- Website uses DRM to protect their content, yt-dlp doesn't support DRM websites
     if result:lower():match("%f[%a]drm%f[%A]") and not result:lower():match("youtube") then
-        return "drm_protected"
+        status = "drm_protected"
+    -- Website isn't supported by yt-dlp
     elseif result:lower():match("unsupported") then
-        return "unsupported"
+        status = "unsupported"
+    -- Nothing will be installed with the provided URL
     elseif result:lower():match("downloading 0 items") then
-        return "nothing"
+        status = "nothing"
+    -- URL is successfully parsed and shouldn't cause problems when executing yt-dlp
+    else
+        status = "valid"
     end
 
-    return "valid"
+    urlValidationCache[website] = status
+    return status
 end
 
--- This is where the user will select the parameters for yt-dlp
+-- This presents the user with the parameter categories
+-- Users can also search for parameters
 function extractionParametersCategory(userChoice)
     local sectionChoice
-    local lastSectionChoice  -- Stores previous section
+    local lastSectionChoice
 
     if userChoice == 2 then
         table.insert(parametersSelected, "-x")
@@ -113,7 +141,7 @@ Which Parameters Do You Want to Enable? (Section)
 Type 'n' to repeat last section.
 Type 'quit' to exit.
 Type 'find -command' to search for a specific parameter.
-Type finished to confirm you're ready for execution.
+Type 'finished' to confirm you're ready for execution.
 
 1. General Options
 2. Network Options
@@ -165,35 +193,29 @@ Type finished to confirm you're ready for execution.
                     "17. Preset Aliases"
                 }
                 
-                -- First try exact match with --
+                -- First try exact match with "--"
                 for i = 1, 17 do
-                    local file = io.open("data/command"..i..".md", "r")
-                    if file then
-                        for line in file:lines() do
-                            if line:find(searchTerm, 1, true) then
-                                found = true
-                                print("Found in: "..categoryNames[i])
-                                break
-                            end
+                    if not commandFileCache[i] then
+                        local file = io.open("data/command"..i..".md", "r")
+                        if file then
+                            commandFileCache[i] = file:read("*a")
+                            file:close()
                         end
-                        file:close()
+                    end
+                    
+                    if commandFileCache[i] and commandFileCache[i]:find(searchTerm, 1, true) then
+                        found = true
+                        print("Found in: "..categoryNames[i])
                     end
                 end
                 
-                -- If not found, try without --
+                -- If not found, try without "--"
                 if not found and searchTerm:match("^%-%-") then
                     local cleanTerm = searchTerm:gsub("^%-%-", "")
                     for i = 1, 17 do
-                        local file = io.open("data/command"..i..".md", "r")
-                        if file then
-                            for line in file:lines() do
-                                if line:match("%f[%w-]"..cleanTerm.."%f[^%w-]") then
-                                    found = true
-                                    print("Found in: "..categoryNames[i])
-                                    break
-                                end
-                            end
-                            file:close()
+                        if commandFileCache[i] and commandFileCache[i]:match("%f[%w-]"..cleanTerm.."%f[^%w-]") then
+                            found = true
+                            print("Found in: "..categoryNames[i])
                         end
                     end
                 end
@@ -250,7 +272,7 @@ Type finished to confirm you're ready for execution.
                         end
                         print()
                     elseif sectionChoice > 0 and sectionChoice < 18 then
-                        lastSectionChoice = sectionChoice  -- Update the last section
+                        lastSectionChoice = sectionChoice
                         parameterSelection(sectionChoice)
                     else
                         print("Please input a number between 1 and 18\n")
@@ -280,11 +302,13 @@ local function extractionBeginning(userChoice)
             os.exit()
         end
 
-        -- Status handling
+        -- URL is valid and can proceed to parameter selection
         if status == "valid" then
             print("Valid URL.")
             print(website)
             allowedWebsite = true
+
+        -- URLs are invalid for reasons specififed in the urlValidation
         elseif status == "invalid" then
             print("Invalid URL. Please enter a valid URL.\n")
         elseif status == "unsupported" then
@@ -305,7 +329,7 @@ local function extractionBeginning(userChoice)
     extractionParametersCategory(userChoice)
 end
 
--- This is the first thing users are prompted with
+-- This is the beginning function, it'll ask the user if they want to extract audio or video
 function welcome()
     repeat
         print([[
@@ -331,8 +355,31 @@ Select an option:
 end
 
 -- Main program execution
+local success = os.execute("yt-dlp --version >nul 2>&1")
+
+if not (success == true or success == 0) then
+    print("yt-dlp is not available or not executable.")
+    print("Please make sure yt-dlp is installed and available in your system's PATH or it's availble in the same folder as the app.")
+    print("Exiting program.")
+    os.exit()
+end
+
+-- Preload all command files into cache at startup
+for i = 1, 17 do
+    local file = io.open("data/command"..i..".md")
+    if not file then
+        print("One or more command.md files couldn't be be found.")
+        print("Please ensure you have all command.md files installed AND in the correct location AND they're all named correctly.")
+        print("Exiting Program.")
+        os.exit()
+    else
+        commandFileCache[i] = file:read("*a")
+        file:close()
+    end
+end
+
 print("Welcome to the yt-dlp Lua Wrapper")
 print("A free, local yt-dlp wrapper made in Lua.")
 print("This is a work in progress challenge application.\n")
 
-local userChoice = welcome()
+welcome()
