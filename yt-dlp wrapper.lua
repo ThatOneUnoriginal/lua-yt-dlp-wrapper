@@ -12,7 +12,7 @@ local urlValidationCache = {} -- For storing URL validation results
 local function execution(parametersSelected, website)
     local parameters = table.concat(parametersSelected, " ")
 
-    local success, exit_type, exit_code = os.execute("yt-dlp ".. parameters .. " ".. website)
+    local success, exit_type, exit_code = os.execute("yt-dlp " .. parameters .. " " .. website)
 
     if success then
         print("Execution finished successfully!")
@@ -23,7 +23,7 @@ local function execution(parametersSelected, website)
         elseif choice == "y" then
             print("")
             welcome()
-        elseif choice =="n" then
+        elseif choice == "n" then
             print("Thanks for using the tool! Reopen the application to use agian.")
             os.exit()
         end
@@ -86,7 +86,6 @@ end
 
 -- This function validates the URL inputted
 local function urlValidation(website)
-
     -- Check cache first
     if urlValidationCache[website] then
         return urlValidationCache[website]
@@ -108,14 +107,14 @@ local function urlValidation(website)
     local status
     -- Website uses DRM to protect their content, yt-dlp doesn't support DRM websites
     if result:lower():match("%f[%a]drm%f[%A]") and not result:lower():match("youtube") then
+        -- Website isn't supported by yt-dlp
         status = "drm_protected"
-    -- Website isn't supported by yt-dlp
     elseif result:lower():match("unsupported") then
+        -- Nothing will be installed with the provided URL
         status = "unsupported"
-    -- Nothing will be installed with the provided URL
     elseif result:lower():match("downloading 0 items") then
+        -- URL is successfully parsed and shouldn't cause problems when executing yt-dlp
         status = "nothing"
-    -- URL is successfully parsed and shouldn't cause problems when executing yt-dlp
     else
         status = "valid"
     end
@@ -166,12 +165,12 @@ Type 'finished' to confirm you're ready for execution.
 
         local input = io.read()
         local skipRest = false
-        
+
         -- Handle find command
         if input:lower():match("^find%s+") then
             local searchTerm = input:match("^find%s+(.+)$")
             if searchTerm then
-                print("\nSearching for: "..searchTerm)
+                print("\nSearching for: " .. searchTerm)
                 local found = false
                 local categoryNames = {
                     "1. General Options",
@@ -192,30 +191,30 @@ Type 'finished' to confirm you're ready for execution.
                     "16. Extractor Options",
                     "17. Preset Aliases"
                 }
-                
+
                 -- First try exact match with "--"
                 for i = 1, 17 do
                     if not commandFileCache[i] then
-                        local file = io.open("data/command"..i..".md", "r")
+                        local file = io.open("data/command" .. i .. ".md", "r")
                         if file then
                             commandFileCache[i] = file:read("*a")
                             file:close()
                         end
                     end
-                    
+
                     if commandFileCache[i] and commandFileCache[i]:find(searchTerm, 1, true) then
                         found = true
-                        print("Found in: "..categoryNames[i])
+                        print("Found in: " .. categoryNames[i])
                     end
                 end
-                
+
                 -- If not found, try without "--"
                 if not found and searchTerm:match("^%-%-") then
                     local cleanTerm = searchTerm:gsub("^%-%-", "")
                     for i = 1, 17 do
-                        if commandFileCache[i] and commandFileCache[i]:match("%f[%w-]"..cleanTerm.."%f[^%w-]") then
+                        if commandFileCache[i] and commandFileCache[i]:match("%f[%w-]" .. cleanTerm .. "%f[^%w-]") then
                             found = true
-                            print("Found in: "..categoryNames[i])
+                            print("Found in: " .. categoryNames[i])
                         end
                     end
                 end
@@ -232,7 +231,6 @@ Type 'finished' to confirm you're ready for execution.
             if input:lower() == "quit" then
                 print("Exiting Program")
                 os.exit()
-
             elseif input:lower() == "finished" then
                 repeat
                     print("Are you sure you've finished selecting all parameters? (y/n)")
@@ -250,15 +248,13 @@ Type 'finished' to confirm you're ready for execution.
                         break
                     end
                 until confirmation == "n" or confirmation == "y"
-
             elseif input:lower() == "n" then
                 if lastSectionChoice then
-                    print("Repeating previous section: "..lastSectionChoice)
+                    print("Repeating previous section: " .. lastSectionChoice)
                     parameterSelection(lastSectionChoice)
                 else
                     print("No previous section to repeat.\n")
                 end
-
             else
                 sectionChoice = tonumber(input)
 
@@ -283,7 +279,6 @@ Type 'finished' to confirm you're ready for execution.
     until sectionChoice and sectionChoice > 0 and sectionChoice < 18
 end
 
-
 -- This handles asking the user for the URL that'll be used
 local function extractionBeginning(userChoice)
     print("\nYou selected: Video Extraction")
@@ -304,11 +299,10 @@ local function extractionBeginning(userChoice)
 
         -- URL is valid and can proceed to parameter selection
         if status == "valid" then
+            -- URLs are invalid for reasons specififed in the urlValidation
             print("Valid URL.")
             print(website)
             allowedWebsite = true
-
-        -- URLs are invalid for reasons specififed in the urlValidation
         elseif status == "invalid" then
             print("Invalid URL. Please enter a valid URL.\n")
         elseif status == "unsupported" then
@@ -359,17 +353,21 @@ local success = os.execute("yt-dlp --version >nul 2>&1")
 
 if not (success == true or success == 0) then
     print("yt-dlp is not available or not executable.")
-    print("Please make sure yt-dlp is installed and available in your system's PATH or it's availble in the same folder as the app.")
+    print(
+        "Please make sure yt-dlp is installed and available in your system's PATH or it's availble in the same folder as the app."
+    )
     print("Exiting program.")
     os.exit()
 end
 
 -- Preload all command files into cache at startup
 for i = 1, 17 do
-    local file = io.open("data/command"..i..".md")
+    local file = io.open("data/command" .. i .. ".md")
     if not file then
         print("One or more command.md files couldn't be be found.")
-        print("Please ensure you have all command.md files installed AND in the correct location AND they're all named correctly.")
+        print(
+            "Please ensure you have all command.md files installed AND in the correct location AND they're all named correctly."
+        )
         print("Exiting Program.")
         os.exit()
     else
