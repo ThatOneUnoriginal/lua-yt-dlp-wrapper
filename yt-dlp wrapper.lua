@@ -1,4 +1,12 @@
 local url = require("socket.url") -- Required dependency
+local paramtersSelected = {}
+
+local function parameterSelection(sectionChoice)
+
+
+
+    return paramtersSelected
+end
 
 -- Function to check if a URL is valid and not DRM-protected
 local function urlValidation(website)
@@ -23,15 +31,14 @@ local function urlValidation(website)
 end
 
 -- This is where the user will select the parameters for yt-dlp
-local function extractionParamtersSelection()
-    local paramtersSelected = {}
-    local userChoice
-    -- This is where all the parameters are loaded from.
-    -- Without it, parameters cannot be displayed or selected from.
-    local file = io.open("commands.md", "r")
-    if not file then
-        print("Couldn't read 'command.txt' file. Please install and place in the same folder.")
+local function extractionParamtersCategory(userChoice)
+    local sectionChoice
+
+    if userChoice == 2 then
+        table.insert(paramtersSelected, "-x")
     end
+
+
     repeat
 -- This presents the users with the categories as done on the yt-dlp repo README page
 print([[
@@ -55,29 +62,35 @@ Type 'quit' to exit.
 15. SponsorBlock Options
 16. Extractor Options
 17. Preset Aliases
-18. Quit
+18. Shows Currently Selected Pramaters
+19. Quit
 ]])
-    userChoice = tonumber(io.read())
+    sectionChoice = tonumber(io.read())
 
     -- User Quits Application
-    if userChoice == 18 then
+    if sectionChoice == 19 then
         print("Exiting Program")
         os.exit()
+    elseif sectionChoice == 18 then
+        print("These are the parameters that have been selected:")
+        for _, param in ipairs(paramtersSelected) do
+            print(param.."\n")
+        end
     end
     -- User Selects a Category
-    if userChoice > 0 and userChoice < 18 then
-        print("Success!")
-        userChoice = nil
+    if sectionChoice > 0 and sectionChoice < 18 then
+        parameterSelection(sectionChoice)
+    elseif sectionChoice == 18 then
+        sectionChoice = nil
     else 
         print("Please input a number between 1 and 18\n")
     end
-    until userChoice and userChoice > 0 and userChoice < 18
-
-
+    until sectionChoice and sectionChoice > 0 and sectionChoice < 18
+   
 end
 
 -- This handles asking the user for the URL that'll be used
-local function extractionBeginning()
+local function extractionBeginning(userChoice)
     print("\nYou selected: Video Extraction")
     
     -- This will prompt the user for the URL
@@ -117,7 +130,7 @@ local function extractionBeginning()
         end
     until allowedWebsite
 
-    extractionParamtersSelection()
+    extractionParamtersCategory(userChoice)
 end
 
 -- This is the first thing users are prompted with
@@ -139,12 +152,13 @@ Select an option:
         print("Exiting Program.")
         os.exit()
     elseif userChoice == 1 or userChoice == 2 then
-        extractionBeginning()
+        extractionBeginning(userChoice)
     end
 until userChoice == 1 or userChoice == 2
+
 end
 
 print("Welcome to the yt-dlp Lua Wrapper")
 print("A free, local yt-dlp wrapper made in Lua.")
 print("This is a work in progress challenge application.\n")
-welcome()
+local userChoice = welcome()
