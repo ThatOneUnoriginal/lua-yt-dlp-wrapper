@@ -1,7 +1,5 @@
 local url = require("socket.url") -- Required dependency
 
-
-
 -- Function to check if a URL is valid and not DRM-protected
 local function urlValidation(website)
     local parsed = url.parse(website)
@@ -24,11 +22,18 @@ local function urlValidation(website)
     return "valid"
 end
 
+-- This is where the user will select the parameters for yt-dlp
 local function extractionParamtersSelection()
     local paramtersSelected = {}
-    print("AFGDSAFGDSGFADSFFGADGAFSD")
     local userChoice
+    -- This is where all the parameters are loaded from.
+    -- Without it, parameters cannot be displayed or selected from.
+    local file = io.open("commands.md", "r")
+    if not file then
+        print("Couldn't read 'command.txt' file. Please install and place in the same folder.")
+    end
     repeat
+-- This presents the users with the categories as done on the yt-dlp repo README page
 print([[
 Which Paramters Do You Want to Enable? (Section)
 Type 'quit' to exit.
@@ -36,38 +41,52 @@ Type 'quit' to exit.
 1. General Options
 2. Network Options
 3. Geo-restriction
-4. Download Options
-5. Filesystem Options
-6. Thumbnail Options
-7. Internet Shortcut Options
-8. Verbosity and Simulation Options
-9. Workarounds
-10. Subtitle Options
-11. Authentication Options
-12. Post-Processing Options
-13. SponsorBlock Options
-14. Extractor Options
-15. Preset Aliases
+4. Video Selection
+5. Download Options
+6. Filesystem Options
+7. Thumbnail Options
+8. Internet Shortcut Options
+9. Verbosity and Simulation Options
+10. Workarounds
+11. Video Format Options
+12. Subtitle Options
+13. Authentication Options
+14. Post-Processing Options
+15. SponsorBlock Options
+16. Extractor Options
+17. Preset Aliases
+18. Quit
 ]])
-    userChoice = io.read():lower()
+    userChoice = tonumber(io.read())
 
-    if userChoice == "quit" then
+    -- User Quits Application
+    if userChoice == 18 then
         print("Exiting Program")
         os.exit()
     end
-    until userChoice
+    -- User Selects a Category
+    if userChoice > 0 and userChoice < 18 then
+        print("Success!")
+        userChoice = nil
+    else 
+        print("Please input a number between 1 and 18\n")
+    end
+    until userChoice and userChoice > 0 and userChoice < 18
+
+
 end
 
-
--- Handles video extraction if user selects option 1
+-- This handles asking the user for the URL that'll be used
 local function extractionBeginning()
     print("\nYou selected: Video Extraction")
     
-    -- Prompt user for a valid URL and validate it
+    -- This will prompt the user for the URL
     local allowedWebsite = false
     repeat
         print("Enter the URL of the video (type 'quit' to exit):")
         local website = io.read()
+
+        -- This will be used to validate the URL after input is given
         local status = urlValidation(website)
 
         if website:lower() == "quit" then
@@ -75,17 +94,23 @@ local function extractionBeginning()
             os.exit()
         end
         
+        -- This indicates the URL is valid, no issues are present
         if status == "valid" then
             print("Valid URL.")
             print(website)
             allowedWebsite = true
+        -- This indicates the URL parsing FAILED, not yt-dlp simulating URL download
         elseif status == "invalid" then
             print("Invalid URL. Please enter a valid URL.\n")
+        -- This indicates yt-dlp will FAIL with provided URL. The website isn't supported by yt-dlp.
         elseif status == "unsupported" then
             print("Invalid URL. Unfortunately this URL isn't supported by yt-dlp.")
             print("To see a list of supported urls, check https://raw.githubusercontent.com/yt-dlp/yt-dlp/refs/heads/master/supportedsites.md\n")
+        -- This indicates yt-dlp will NOT download anything with provided URL.
+        -- URL works and is supported by yt-dlp
         elseif status == "nothing" then
             print("Invalid URL. Provided URL will download 0 items.\n")
+        -- This indicates yt-dlp will FAIL with provided URL. The content is DRM protected.
         elseif status == "drm_protected" then
             print("Invalid URL. Requested Website is Known to Use DRM Protections.")
             print("To see a list of supported urls, check https://raw.githubusercontent.com/yt-dlp/yt-dlp/refs/heads/master/supportedsites.md\n")
@@ -95,6 +120,7 @@ local function extractionBeginning()
     extractionParamtersSelection()
 end
 
+-- This is the first thing users are prompted with
 local function welcome()
 repeat
     print([[
@@ -119,6 +145,6 @@ until userChoice == 1 or userChoice == 2
 end
 
 print("Welcome to the yt-dlp Lua Wrapper")
-print("A free, local yt-dlp wrapper made in Lua.\n")
-print("This is a work in progress challenge application.")
+print("A free, local yt-dlp wrapper made in Lua.")
+print("This is a work in progress challenge application.\n")
 welcome()
