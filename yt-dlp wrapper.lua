@@ -1,6 +1,29 @@
 local url = require("socket.url") -- Required dependency
 local parametersSelected = {}
 local extractionParametersCategory
+local welcome
+local website
+
+local function execution(parametersSelected, website)
+    local parameters = table.concat(parametersSelected, " ")
+
+    local success, exit_type, exit_code = os.execute("yt-dlp ".. parameters .. " ".. website)
+
+    if success then
+        print("Execution finished successfully!")
+        print("\nDo you wish to execute again?")
+        local choice = io.read()
+        if choice ~= "y" and choice ~= "n" then
+            print("Please input either y or n.")
+        elseif choice == "y" then
+            print("")
+            welcome()
+        elseif choice =="n" then
+            print("Thanks for using the tool! Reopen the application to use agian.")
+            os.exit()
+        end
+    end
+end
 
 local function parameterSelection(sectionChoice)
     local file = io.open("data/command" .. sectionChoice .. ".md", "r")
@@ -20,19 +43,34 @@ local function parameterSelection(sectionChoice)
     repeat
         print("Input which parameters you want to use from this list.")
         print("You can input multiple parameters at once.")
-        print("Type 'exit' to return to category selecton.\nType'quit' to exit the program.")
+        print("Type 'exit' to return to category selecton.\nType'quit' to exit the program.\n")
         local parameterInput = io.read()
 
         if parameterInput:lower() == "quit" then
             print("Exiting Program")
             os.exit()
         elseif parameterInput:lower() == "exit" then
+            print("")
             extractionParametersCategory()
         else
             for param in parameterInput:gmatch("[^,]+") do
                 local trimmedParam = param:match("^%s*(.-)%s*$")
-                table.insert(parametersSelected, trimmedParam)
+                local found = false
+
+                for i, v in ipairs(parametersSelected) do
+                    if v == trimmedParam then
+                        table.remove(parametersSelected, i)
+                        found = true
+                        print("'" .. trimmedParam .. "' removed from selection.")
+                        break
+                    end
+                end
+
+                if not found then
+                    table.insert(parametersSelected, trimmedParam)
+                end
             end
+            print("")
         end
     until false
 end
@@ -62,6 +100,7 @@ end
 -- This is where the user will select the parameters for yt-dlp
 function extractionParametersCategory(userChoice)
     local sectionChoice
+    local lastSectionChoice  -- Stores previous section
 
     if userChoice == 2 then
         table.insert(parametersSelected, "-x")
@@ -70,9 +109,11 @@ function extractionParametersCategory(userChoice)
     repeat
         print(
             [[
-Which Paramters Do You Want to Enable? (Section)
+Which Parameters Do You Want to Enable? (Section)
+Type 'n' to repeat last section.
 Type 'quit' to exit.
-Type 'find --command' to search for a specific parameter
+Type 'find -command' to search for a specific parameter.
+Type finished to confirm you're ready for execution.
 
 1. General Options
 2. Network Options
@@ -91,8 +132,7 @@ Type 'find --command' to search for a specific parameter
 15. SponsorBlock Options
 16. Extractor Options
 17. Preset Aliases
-18. Shows Currently Selected Pramaters
-19. Quit
+18. Shows Currently Selected Parameters
 ]]
         )
 
@@ -170,31 +210,57 @@ Type 'find --command' to search for a specific parameter
             if input:lower() == "quit" then
                 print("Exiting Program")
                 os.exit()
-            end
 
-            sectionChoice = tonumber(input)
-
-            if sectionChoice == nil then
-                print("Invalid input, please enter a number between 1 and 19 or use the find command.\n")
-            else
-                if sectionChoice == 19 then
-                    print("Exiting Program")
-                    os.exit()
-                elseif sectionChoice == 18 then
-                    print("These are the parameters that have been selected:")
+            elseif input:lower() == "finished" then
+                repeat
+                    print("Are you sure you've finished selecting all parameters? (y/n)")
+                    print("For reference, these are the parameters you've added:")
                     for _, param in ipairs(parametersSelected) do
                         print(param)
                     end
-                    print()
-                elseif sectionChoice > 0 and sectionChoice < 18 then
-                    parameterSelection(sectionChoice)
+                    print("")
+                    local confirmation = io.read():lower()
+                    if confirmation == "y" then
+                        execution(parametersSelected, website)
+                        return
+                    elseif confirmation == "n" then
+                        print("")
+                        break
+                    end
+                until confirmation == "n" or confirmation == "y"
+
+            elseif input:lower() == "n" then
+                if lastSectionChoice then
+                    print("Repeating previous section: "..lastSectionChoice)
+                    parameterSelection(lastSectionChoice)
                 else
-                    print("Please input a number between 1 and 19\n")
+                    print("No previous section to repeat.\n")
+                end
+
+            else
+                sectionChoice = tonumber(input)
+
+                if sectionChoice == nil then
+                    print("Invalid input, please enter a number between 1 and 18 or use the find command.\n")
+                else
+                    if sectionChoice == 18 then
+                        print("These are the parameters that have been selected:")
+                        for _, param in ipairs(parametersSelected) do
+                            print(param)
+                        end
+                        print()
+                    elseif sectionChoice > 0 and sectionChoice < 18 then
+                        lastSectionChoice = sectionChoice  -- Update the last section
+                        parameterSelection(sectionChoice)
+                    else
+                        print("Please input a number between 1 and 18\n")
+                    end
                 end
             end
         end
     until sectionChoice and sectionChoice > 0 and sectionChoice < 18
 end
+
 
 -- This handles asking the user for the URL that'll be used
 local function extractionBeginning(userChoice)
@@ -204,7 +270,7 @@ local function extractionBeginning(userChoice)
     local allowedWebsite = false
     repeat
         print("Enter the URL of the video (type 'quit' to exit):")
-        local website = io.read()
+        website = io.read()
 
         -- This will be used to validate the URL after input is given
         local status = urlValidation(website)
@@ -240,7 +306,7 @@ local function extractionBeginning(userChoice)
 end
 
 -- This is the first thing users are prompted with
-local function welcome()
+function welcome()
     repeat
         print([[
 Select an option:
