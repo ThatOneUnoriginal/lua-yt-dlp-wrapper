@@ -1,6 +1,7 @@
 local ffmpeg
-local inputURL = "https://www.youtube.com/watch?v=OBFX4EuAWHc"
+local inputURL = "https://www.youtube.com/watch?v=OBFX4EuAWHc" -- TODO: Change it so that user inputs their URL (and it validates it)
 local params = {}
+local co
 
 local function getUserInput(prompt)
     if prompt then
@@ -13,7 +14,6 @@ local function getUserInput(prompt)
     end
     return input
 end
-
 
 local function silentExecute(cmd)
 	local isWindows = package.config:sub(1,1) == "\\"
@@ -29,12 +29,49 @@ local function silentExecute(cmd)
 	end
 end
 
-local function audioParameters(chosenFormat)
-	-- Set Audio Quality
+local function customParamaters()
+end
 
+local function sharedParameters()
+    while true do
+        print("\nWould you like to embed metadata? (y/n):")
+        local input = getUserInput():lower()
+
+        if input == "y" then
+            table.insert(params, "--embed-metadata")
+            break
+        elseif input == "n" then
+            break
+        else
+            print("Please type 'y' or 'n'.")
+        end        
+    end
+
+    while true do
+        print("\nWould you like to embed thumbnail? (y/n):")
+        local input = getUserInput():lower()
+
+        if input == "y" then
+            table.insert(params, "--embed-thumbnail")
+            break
+        elseif input == "n" then
+            break
+        else
+            print("Please type 'y' or 'n'.")
+        end        
+    end
+    coroutine.resume(co)
+end
+
+-- This allows users to enable basic options when exporting audio
+local function audioParameters()
+	-- Set Audio Quality
+    -- TODO: Add base options for audioParameters
 	-- Set Filename Template
 end
 
+-- This allows users to enable more advanced options when exporting video
+-- TODO: Add "custom" parameter inputting
 local function videoAdvanced()
 	local subFormats = {"vtt", "srt", "ttml","json3","srv1","srv2","srv3"}
 	local function subtitleFormatting()
@@ -108,60 +145,81 @@ local function videoAdvanced()
 		else
 			print("Unrecognized choice. Please enter one of the following: 'auto', 'manual', 'both', or 'none'.")
 		end
+        
 	end
 end
 
 local function videoParameters()
-	-- Set video format quality
-	local areSubs = false
-	local done = false
+    -- This is the coroutine function
+    co = coroutine.create(function()
+        -- Embed Subtitles
+        local areSubs = false
+        local done = false
 
-	-- Embed Subtitles
-	while true do
-		print("\nWould you like to embed subtitles? (y/n):")
-		local input = getUserInput():lower()
+        while true do
+            print("\nWould you like to embed subtitles? (y/n):")
+            local input = getUserInput():lower()
 
-		if input == "y" then
-			table.insert(params, "--embed-subs")
-			areSubs = true
-			break
-		elseif input == "n" then
-			print("Subtitles will not be embedded into the video.")
-			break
-		else
-			print("Please type 'y' or 'n'.")
-		end
-	end
+            if input == "y" then
+                table.insert(params, "--embed-subs")
+                areSubs = true
+                break
+            elseif input == "n" then
+                print("Subtitles will not be embedded into the video.")
+                break
+            else
+                print("Please type 'y' or 'n'.")
+            end
+        end
 
-	while true do
-		if done == true then break else end
-		if areSubs == false then break end
-		print("\nSelect subtitle language (type 'list' to view available options):")
-		local input = getUserInput():lower()
-		
-		if input == "list" then
-			print("")
-			os.execute("yt-dlp --list-subs "..inputURL)
-		else
-			while true do
-				print("\nConfirm selecting " .. input .. " as the subtitle language? (y/n):")
-				local confirmation = getUserInput():lower()
+        while true do
+            if done == true or areSubs == false then break end
+            print("\nSelect subtitle language (type 'list' to view available options):")
+            local input = getUserInput():lower()
+            
+            if input == "list" then
+                print("")
+                os.execute("yt-dlp --list-subs "..inputURL)
+            else
+                while true do
+                    print("\nConfirm selecting " .. input .. " as the subtitle language? (y/n):")
+                    local confirmation = getUserInput():lower()
 
-				if confirmation == "y" then
-					done= true
-					print(input .. " has been set as the subtitle language.")
-					print("Please note, the program assumes you have selected a compatible subtitle language.")
-					print("If the chosen language doesn't work, it could be due to user error or a failure with yt-dlp.")
-					break
-				elseif confirmation == "n" then
-					break
-				else
-					print("Please type 'y' or 'n'.")
-				end
-			end
-		end
-	end
-	-- Subtitle Language
+                    if confirmation == "y" then
+                        done= true
+                        print(input .. " has been set as the subtitle language.")
+                        break
+                    elseif confirmation == "n" then
+                        break
+                    else
+                        print("Please type 'y' or 'n'.")
+                    end
+                end
+            end
+        end
+
+        while true do
+            print("\nWould you like to embed video chapters? (y/n):")
+            local input = getUserInput():lower()
+
+            if input == "y" then
+                table.insert(params, "--embed-chapters")
+                break
+            elseif input == "n" then
+                break
+            else
+                print("Please type 'y' or 'n'.")
+            end
+        end
+
+        coroutine.yield()  -- pause here, resume after sharedParameters
+        videoAdvanced()
+    end)
+
+    -- Start coroutine
+    coroutine.resume(co)
+    -- sharedParameters will resume it after finishing
+    sharedParameters()
 end
 
 local function handleExportFormat(selection)
