@@ -1,7 +1,67 @@
+local url = require("socket.url")
 local ffmpeg
-local inputURL = "https://www.youtube.com/watch?v=OBFX4EuAWHc" -- TODO: Change it so that user inputs their URL (and it validates it)
+local inputURL
 local params = {}
 local co
+local selection
+local promptExportType
+local urlInput
+
+local function urlValidation(website)
+    -- Parse the URL with LuaSocket
+    local parsed = url.parse(website)
+    if not (parsed and parsed.scheme and parsed.host) then
+        return "invalid"
+    end
+
+    -- Simulate yt-dlp execution using the URL
+    local handle = io.popen("yt-dlp " .. website .. " 2>&1")
+    local result = handle:read("*a")
+    handle:close()
+
+    local status
+    local lower_result = result:lower()
+    -- Check for DRM protection, excluding YouTube
+    if lower_result:match("%f[%a]drm%f[%A]") and not lower_result:match("youtube") then
+        status = "drm_protected"
+    elseif lower_result:match("unsupported") then
+        status = "unsupported"
+    elseif lower_result:match("downloading 0 items") then
+        status = "nothing"
+    else
+        status = "valid"
+    end
+
+    return status
+end
+
+local function execution()
+    local output = table.concat(params, " ")
+    os.execute("yt-dlp -s "..output.." "..inputURL)
+
+    while true do
+        print("\nDo you wish to export another "..selection.."?")
+        print(" 1) Export again (don't change export type).")
+        print(" 2) Export again (allow me to choose export type again).")
+        print(" 3) Close application / no thanks.\n")
+
+        local input = io.read()
+        if input == "1" then
+            print("")
+            urlInput()
+            break
+        elseif input == "2" then
+            print("")
+            promptExportType()
+            break
+        elseif input == "3" then
+            print("\nExiting program......")
+            os.exit()
+        else
+            print("Please type 1, 2 or 3.")
+        end
+    end
+end
 
 local function getUserInput(prompt)
     if prompt then
@@ -9,7 +69,7 @@ local function getUserInput(prompt)
     end
     local input = io.read()
     if input and input:lower() == "quit" then
-		print("Exiting program...")
+		print("Exiting program......")
         os.exit()
     end
     return input
@@ -25,7 +85,7 @@ local function silentExecute(cmd)
 	elseif type(ok1) == "boolean" then
 		return ok1 and 0 or (code or 1)
 	else
-		return 1 
+		return 1
 	end
 end
 
@@ -213,7 +273,7 @@ local function videoParameters()
         end
 
         coroutine.yield()  -- pause here, resume after sharedParameters
-        videoAdvanced()
+        execution()
     end)
 
     -- Start coroutine
@@ -222,11 +282,12 @@ local function videoParameters()
     sharedParameters()
 end
 
-local function handleExportFormat(selection)
+local function handleExportFormat()
 
 	if ffmpeg == false then
 		print("ffmpeg is unavailable; you cannot select the " .. selection .. " option.")
 		if selection == "audio" then
+            table.insert(params, "-x")
 			audioParameters()
 		else
 			videoParameters()
@@ -285,21 +346,52 @@ local function handleExportFormat(selection)
 	end
 end
 
-local function promptExportType()
+function urlInput()
+    while true do
+        print("\nEnter the URL that you're wanting to export (type 'quit' to exit):")
+        inputURL = io.read()
+
+        local status = urlValidation(inputURL)
+
+        if inputURL:lower() == "quit" then
+            print("Exiting program....")
+        end
+
+        if status == "valid" then
+            -- URLs are invalid for reasons specififed in the urlValidation
+            print("Valid URL.")
+            handleExportFormat()
+            break
+        elseif status == "invalid" then
+            print("Invalid URL. Please enter a valid URL.")
+        elseif status == "unsupported" then
+            print("Invalid URL. Unfortunately this URL isn't supported by yt-dlp.")
+            print(
+                "To see a list of supported urls, check https://raw.githubusercontent.com/yt-dlp/yt-dlp/refs/heads/master/supportedsites.md"
+            )
+        elseif status == "nothing" then
+            print("Invalid URL. Provided URL will download 0 items.")
+        elseif status == "drm_protected" then
+            print("Invalid URL. Requested Website is Known to Use DRM Protections.")
+            print(
+                "To see a list of supported urls, check https://raw.githubusercontent.com/yt-dlp/yt-dlp/refs/heads/master/supportedsites.md"
+            )
+        end
+    end
+end
+
+function promptExportType()
 	while true do
 		print("Would you like to export audio or video? Type 'quit' to exit program:")
-		local response = getUserInput():lower()
-		local exportType
+		selection = getUserInput():lower()
 
-		if response == "video" then
-			exportType = "video"
+		if selection == "video" then
 			print("Video export selected.")
-			handleExportFormat(exportType)
+			urlInput()
 			break
-		elseif response == "audio" then
-			exportType = "audio"
+		elseif selection == "audio" then
 			print("Audio export selected.")
-			handleExportFormat(exportType)
+            urlInput()
 			break
 		else
 			print("\nInvalid input. Please type 'audio' or 'video'.")
@@ -333,4 +425,4 @@ else
 	ffmpeg = true
 end
 
-videoParameters()
+displayWelcomeMessage()
