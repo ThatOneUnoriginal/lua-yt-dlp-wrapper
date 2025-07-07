@@ -90,7 +90,38 @@ local function silentExecute(cmd)
 end
 
 local function customParamaters()
+    while true do
+        local parameterInput = io.read()
+
+        for param in parameterInput:gmatch("[^,]+") do
+            local trimmedParam = param:match("^%s*(.-)%s*$")
+            local isDelete = trimmedParam:sub(1, 4) == "del "
+            local actualParam = isDelete and trimmedParam:sub(5):match("^%s*(.-)%s*$") or trimmedParam
+            local found = false
+
+            for i, v in ipairs(params) do
+                if v == actualParam then
+                    found = true
+                    if isDelete then
+                        table.remove(params, i)
+                        print("'" .. actualParam .. "' removed from selection.")
+                    else
+                        print("'" .. actualParam .. "' is already in the selection. Use 'del " .. actualParam .. "' to remove it.")
+                    end
+                    break
+                end
+            end
+
+            if not found and not isDelete then
+                table.insert(params, actualParam)
+                print("'" .. actualParam .. "' added to selection.")
+            elseif not found and isDelete then
+                print("'" .. actualParam .. "' not found in the selection.")
+            end
+        end
+    end
 end
+
 
 local function sharedParameters()
     while true do
@@ -423,7 +454,7 @@ local function displayWelcomeMessage()
 	promptExportType()
 end
 
-print("\nChecking to see if yt-dlp is accessible...")
+--[[print("\nChecking to see if yt-dlp is accessible...")
 
 if silentExecute("yt-dlp --version") == 1 then
 	error("yt-dlp is not installed or not accessible in PATH.", 2)
@@ -440,6 +471,6 @@ if silentExecute("ffmpeg --version") == 1 then
 else
 	print("ffmpeg was accessed successfully!\n")
 	ffmpeg = true
-end
+end]]
 
-displayWelcomeMessage()
+customParamaters()
