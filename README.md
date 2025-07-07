@@ -23,25 +23,14 @@ Yes, but from what I understand, creating UI windows requires an additional Lua 
 It depends. Since this program is meant to test my Lua skills, I prefer not to rely on others' code when possible. If a pull request adds features I could implement myself, it probably won't be accepted. However, I may accept fixes for overlooked issues or more efficient implementations of existing functions. In general, I'd prefer if you opened an issue first instead.
 
 ## Is this a "vibe-coded" yt-dlp wrapper?
-It's a mix. I wrote about 98% of the code myself. I only use AI to help me understand unfamiliar concepts (like new functions) or to debug errors I can't figure out right away. I've never asked AI to "write the entire program so I could charge ridiculous prices while falsely claiming it's free" (if you know, you know). I also used AI to check the ReadMe, but only for grammar fixes.
+It's a mix. I wrote about 90% of the code myself. I only use AI to help me understand unfamiliar concepts (like new functions) or to debug errors I can't figure out right away. I've never asked AI to "write the entire program so I could charge ridiculous prices while falsely claiming it's free" (if you know, you know). I also used AI to check the ReadMe, but only for grammar fixes.
 
 ## When will this be considered complete?
 This might be ambitious, but I want to create a version of the application that fully utilizes yt-dlp's capabilities—a complete wrapper, not just a limited version with functions I arbitrarily deem "popular enough." At the very least, I'm aiming to implement all the basic parameters.
 # Dependencies  
 
 ## Lua  
-This yt-dlp script is built with [Lua](https://www.lua.org/home.html), so you'll need Lua installed on your system. The script was developed using **Lua 5.4**, so it's recommended to use this version for compatibility. Older or newer versions may work, but proceed with caution. You can download Lua from the [official website](https://www.lua.org/download.html).  
-
-## LuaRocks  
-LuaRocks is required to install an essential library for the program. To get LuaRocks, follow the installation guide on the [LuaRocks GitHub repository](https://luarocks.github.io/luarocks/releases/).  
-
-## LuaSocket  
-LuaSocket is necessary for URL validation—without it, the extraction process won't work. Since LuaSocket is installed via LuaRocks, you'll need LuaRocks set up first.  
-
-Once LuaRocks is installed, you can install LuaSocket by running:  
-```
-luarocks install luasocket
-```
+This yt-dlp script is built with [Lua](https://www.lua.org/home.html), so you'll need Lua installed on your system. The script was developed using **Lua 5.4**, so it's recommended to use this version for compatibility. Older or newer versions may work, but proceed with caution. You can download Lua from the [official website](https://www.lua.org/download.html).
 
 ## yt-dlp
 **yt-dlp** is a powerful command-line tool for downloading audio and video from thousands of websites. Unlike cloud-based solutions, all processing happens locally meaning you must have **yt-dlp** installed on your device.  
