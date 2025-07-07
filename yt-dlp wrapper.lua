@@ -454,7 +454,7 @@ local function displayWelcomeMessage()
 	promptExportType()
 end
 
---[[print("\nChecking to see if yt-dlp is accessible...")
+print("\nChecking to see if yt-dlp is accessible...")
 
 if silentExecute("yt-dlp --version") == 1 then
 	error("yt-dlp is not installed or not accessible in PATH.", 2)
@@ -471,6 +471,6 @@ if silentExecute("ffmpeg --version") == 1 then
 else
 	print("ffmpeg was accessed successfully!\n")
 	ffmpeg = true
-end]]
+end
 
-customParamaters()
+displayWelcomeMessage()
