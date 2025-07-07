@@ -273,6 +273,21 @@ local function videoParameters()
         end
 
         coroutine.yield()  -- pause here, resume after sharedParameters
+        while true do
+            print("\nDo you want to choose more advanced options? (y/n):")
+            local input = getUserInput():lower()
+            if input == "y" then
+                print("Moving to advanced video paramater selection.")
+                videoAdvanced()
+                break
+            elseif input == "n" then
+                print("Skipping advanced video parameter selection.")
+                execution()
+                break
+            else
+                print("Please type 'y' or 'n'.")
+            end
+        end
         execution()
     end)
 
@@ -309,7 +324,7 @@ local function handleExportFormat()
 
 	while true do
 		print("\nEnter the desired export format (requires ffmpeg). Type 'quit' to exit program:")
-
+        print("Available "..selection.." formats: "..table.concat(validFormats, ", "))
 		local isValid = false
 		local isInvalid = false
 		local chosenFormat = getUserInput():lower()
@@ -351,11 +366,13 @@ function urlInput()
         print("\nEnter the URL that you're wanting to export (type 'quit' to exit):")
         inputURL = io.read()
 
-        local status = urlValidation(inputURL)
-
         if inputURL:lower() == "quit" then
             print("Exiting program....")
+        else
+            print("Validating URL, this may take a couple minutes...")
         end
+
+        local status = urlValidation(inputURL)
 
         if status == "valid" then
             -- URLs are invalid for reasons specififed in the urlValidation
