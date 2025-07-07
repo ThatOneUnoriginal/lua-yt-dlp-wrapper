@@ -95,7 +95,6 @@ local function getKey(param)
 end
 
 local function customParamaters()
-
     while true do
         print("\nDo you want to add custom options? (y/n):")
         local input = getUserInput():lower()
@@ -105,72 +104,94 @@ local function customParamaters()
         elseif input == "n" then
             print("Skipping custom parameter selection.")
             execution()
-            break
+            return
         else
             print("Please type 'y' or 'n'.")
         end
     end
+
     print("\nEnter a custom parameter:")
     while true do
-
         print("Type 'list' to view all selected parameters.")
         print("Type 'del {parameter}' to remove a parameter.\n")
-    
+
         local parameterInput = io.read()
+        local trimmedInput = parameterInput:match("^%s*(.-)%s*$")
 
-        for param in parameterInput:gmatch("[^,]+") do
-            local trimmedParam = param:match("^%s*(.-)%s*$")
-            local isDelete = trimmedParam:sub(1, 4) == "del "
-            local isList = trimmedParam:sub(1,5) == "list"
-            local actualParam = isDelete and trimmedParam:sub(5):match("^%s*(.-)%s*$") or trimmedParam
-            local found = false
+        if trimmedInput == "list" then
+            if #params == 0 then
+                print("\nNo parameters have been selected.\n")
+            else
+                print("\nSelected parameters: " .. table.concat(params, ", ") .. "\n")
+            end
+        elseif trimmedInput:sub(1, 4) == "del " then
+            local rest = trimmedInput:sub(5)
+            for delParam in rest:gmatch("%S+") do
+                local actualParam = delParam:match("^%s*(.-)%s*$")
+                local paramKey = getKey(actualParam)
+                local found = false
 
-            -- Find if parameter with the same key exists
-            local paramKey = getKey(actualParam)
-
-            for i, v in ipairs(params) do
-                local existingKey = getKey(v)
-                if existingKey == paramKey then
-                    found = true
-                    if isDelete then
-                        -- Remove the matching parameter
+                for i, v in ipairs(params) do
+                    if getKey(v) == paramKey then
                         table.remove(params, i)
                         print("'" .. actualParam .. "' removed from selection.\n")
-                    elseif isList then
-                        -- For list command you can print params later, do nothing here
-                    else
+                        found = true
+                        break
+                    end
+                end
+
+                if not found then
+                    print("'" .. actualParam .. "' not found in the selection.\n")
+                end
+            end
+        else
+            local index = 1
+            local len = #trimmedInput
+            while index <= len do
+                -- Match start of a new parameter
+                local start, stop, prefix = trimmedInput:find("()%s*(-?%-?)%S", index)
+                if not start then
+                    break
+                end
+
+                index = start
+
+                -- Find the next parameter or end of string
+                local nextStart = trimmedInput:find(" %-%-?%S", index + 1)
+                local paramChunk
+                if nextStart then
+                    paramChunk = trimmedInput:sub(index, nextStart - 1)
+                    index = nextStart
+                else
+                    paramChunk = trimmedInput:sub(index)
+                    index = len + 1
+                end
+
+                local actualParam = paramChunk:match("^%s*(.-)%s*$")
+                local paramKey = getKey(actualParam)
+                local found = false
+
+                for i, v in ipairs(params) do
+                    if getKey(v) == paramKey then
+                        found = true
                         if v == actualParam then
-                            -- Parameter already exists exactly
                             print("'" .. actualParam .. "' already exists. Type 'del " .. actualParam .. "' to remove it.\n")
                         else
-                            -- Replace existing param with new one
                             params[i] = actualParam
                             print("'" .. actualParam .. "' replaced the old '" .. v .. "'.\n")
                         end
+                        break
                     end
-                    break
                 end
-            end
 
-
-            -- If no param with same key found and not delete or list, add new param
-            if not found and not isDelete and not isList then
-                table.insert(params, actualParam)
-                print("'" .. actualParam .. "' added to selection.\n")
-            elseif not found and isDelete and not isList then
-                print("'" .. actualParam .. "' not found in the selection.\n")
-            elseif isList then
-                if #params == 0 then
-                    print("\nNo parameters have been selected.\n")
-                else
-                    print("\nSelected parameters: "..(table.concat(params, ", ")))
-                    print("")
+                if not found then
+                    table.insert(params, actualParam)
+                    print("'" .. actualParam .. "' added to selection.\n")
                 end
             end
         end
     end
 end
-
 
 local function sharedParameters()
     while true do
