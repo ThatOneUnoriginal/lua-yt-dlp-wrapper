@@ -7,6 +7,7 @@ local selection
 local promptExportType
 local urlInput
 
+-- Checks if yt-dlp successfully executes. Ensuring it's always available.
 local function ytCheck(success, exit_type, exit_code)
     if not success then
         error("Error: Failed to execute yt-dlp command (runtime error).", 2)
@@ -15,8 +16,9 @@ local function ytCheck(success, exit_type, exit_code)
     end
 end
 
+-- Checks if url can be parsed (w/ url.lua) and would not cause any immediate issues with
+-- yt-dlp (ex: a DRM protected website WONT work woth yt-dlp)
 local function urlValidation(website)
-    -- Parse the URL with LuaSocket
     local result
     local parsed = url.parse(website)
     if not (parsed and parsed.scheme and parsed.host) then
@@ -35,7 +37,8 @@ local function urlValidation(website)
     end
     local status
     local lower_result = result:lower()
-    -- Check for DRM protection, excluding YouTube
+    -- Sometimes warning(s) will appear talking about DRM protection on some clients
+    -- that it uses for YouTube downloading, but they're warnings, not errors
     if lower_result:match("%f[%a]drm%f[%A]") and not lower_result:match("youtube") then
         status = "drm_protected"
     elseif lower_result:match("unsupported") then
@@ -49,6 +52,7 @@ local function urlValidation(website)
     return status
 end
 
+-- Executes the yt-dlp command once parameters have been added / selected earlier
 local function execution()
     local output = table.concat(params, " ")
     -- local result = os.execute("yt-dlp -s "..output.." "..inputURL)
@@ -79,6 +83,7 @@ local function execution()
     end
 end
 
+-- Helper function to detect if 'quit' is ever inputted
 local function getUserInput(prompt)
     if prompt then
         io.write(prompt)
@@ -91,6 +96,7 @@ local function getUserInput(prompt)
     return input
 end
 
+-- Helper function to execute commands WITHOUT them appearing on the command line.
 local function silentExecute(cmd)
     local isWindows = package.config:sub(1, 1) == "\\"
     local nullDevice = isWindows and "NUL" or "/dev/null"
@@ -105,11 +111,13 @@ local function silentExecute(cmd)
     end
 end
 
+-- Helper function used in customParameters()
 local function getKey(param)
     -- Extract the key part of the parameter, assuming it's the first word (up to first space)
     return param:match("^(%S+)")
 end
 
+-- Allows users to select / add custom parameters
 local function customParameters()
     while true do
         print("\nDo you want to add custom options? (y/n):")
@@ -134,12 +142,14 @@ local function customParameters()
         local parameterInput = io.read()
         local trimmedInput = parameterInput:match("^%s*(.-)%s*$")
 
+        -- Lists all parameters selected
         if trimmedInput == "list" then
             if #params == 0 then
                 print("\nNo parameters have been selected.\n")
             else
                 print("\nSelected parameters: " .. table.concat(params, ", ") .. "\n")
             end
+        -- Deletes parameters
         elseif trimmedInput:sub(1, 4) == "del " then
             local rest = trimmedInput:sub(5)
             for delParam in rest:gmatch("%S+") do
@@ -212,6 +222,7 @@ local function customParameters()
     end
 end
 
+-- Parameters used both within video and audio
 local function sharedParameters()
     while true do
         print("\nWould you like to embed metadata? (y/n):")
@@ -251,9 +262,9 @@ local function audioParameters()
 end
 
 -- This allows users to enable more advanced options when exporting video
--- TODO: Add "custom" parameter inputting
 local function videoAdvanced()
     local subFormats = {"vtt", "srt", "ttml", "json3", "srv1", "srv2", "srv3"}
+    -- Only happens IF the user chooses to download subtitles into a seperate file
     local function subtitleFormatting()
         local done = false
 
@@ -276,8 +287,7 @@ local function videoAdvanced()
 
             print("")
 
-            local success, exit_type, exit_code =
-                os.execute("yt-dlp -s --write-auto-subs --sub-format " .. format .. " " .. inputURL)
+            local success, exit_type, exit_code = os.execute("yt-dlp -s --write-auto-subs --sub-format " .. format .. " " .. inputURL)
             ytCheck(success, exit_type, exit_code)
 
             print("\nDo you want to continue with " .. format .. " as the subtitle file format? (y/n):")
@@ -337,6 +347,7 @@ local function videoAdvanced()
     end
 end
 
+-- Parameters that are useful for most people when exporting video
 local function videoParameters()
     -- This is the coroutine function
     co =
@@ -346,6 +357,7 @@ local function videoParameters()
             local areSubs = false
             local done = false
 
+            -- Subtitle embedding
             while true do
                 print("\nWould you like to embed subtitles? (y/n):")
                 local input = getUserInput():lower()
@@ -362,6 +374,7 @@ local function videoParameters()
                 end
             end
 
+            -- Subtitle language, only fires if subtitles are embedded
             while true do
                 if done == true or areSubs == false then
                     break
@@ -391,6 +404,7 @@ local function videoParameters()
                 end
             end
 
+            -- Video Chapters
             while true do
                 print("\nWould you like to embed video chapters? (y/n):")
                 local input = getUserInput():lower()
@@ -405,7 +419,8 @@ local function videoParameters()
                 end
             end
 
-            coroutine.yield() -- pause here, resume after sharedParameters
+
+            coroutine.yield() -- yields to sharedParameters()
             while true do
                 print("\nDo you want to choose more advanced options? (y/n):")
                 local input = getUserInput():lower()
@@ -430,6 +445,7 @@ local function videoParameters()
     sharedParameters()
 end
 
+-- Handles format selection, skips if ffmpeg was never found.
 local function handleExportFormat()
     if ffmpeg == false then
         print("ffmpeg is unavailable; you cannot select the " .. selection .. " option.")
@@ -486,6 +502,7 @@ local function handleExportFormat()
                 audioParameters()
                 break
             else
+                table.insert(params, "--recode-video "..chosenFormat)
                 videoParameters()
                 break
             end
@@ -493,6 +510,7 @@ local function handleExportFormat()
     end
 end
 
+-- Handles inputting URL that will be downloaded
 function urlInput()
     while true do
         print("\nEnter the URL that you're wanting to export (type 'quit' to exit):")
@@ -529,6 +547,7 @@ function urlInput()
     end
 end
 
+-- Asks if user wants video or audio
 function promptExportType()
     while true do
         print("Would you like to export audio or video? Type 'quit' to exit program:")
@@ -555,6 +574,7 @@ local function displayWelcomeMessage()
     promptExportType()
 end
 
+-- Basic checks at the beggining for ffmpeg and yt-dlp
 print("\nChecking to see if yt-dlp is accessible...")
 
 if silentExecute("yt-dlp --version") == 1 then
