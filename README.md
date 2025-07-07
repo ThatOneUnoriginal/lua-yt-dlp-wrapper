@@ -1,6 +1,25 @@
+# TODO
+## Save Location
+By default, downloaded files are saved to the application’s root directory. While users can currently override this via a custom parameter, given its frequent use, save location configuration will be moved to the sharedParameters() section for easier access.
+
+## Exclusion File
+At present, previously downloaded items can be downloaded again, which is inconvenient—especially when handling playlists where only new content is desired. Although this can be configured with a custom parameter, support for an exclusion file will also be added to the sharedParameters() section to improve usability for typical users.
+
+## Default Locations
+To streamline repeated usage, default paths will be introduced for both save locations and exclusion files. When prompted to set these paths, users can either accept the current default by pressing Enter or input a new location. If a new path is provided, the user will be asked whether they want to save it as the new default.
+
+## Bundle yt-dlp
+Since yt-dlp is a core dependency without which the application cannot function, it's important to ensure it's always reliably available. Currently, users are required to install yt-dlp manually and ensure it’s accessible—typically by adding it to their system’s environment variables. To improve usability and reduce setup friction, the application should consider bundling yt-dlp directly, or automatically downloading it on first run, eliminating the need for manual installation and configuration by the user.
+
+## Finish audioParameters
+Currently, if a user selects the option to export audio, they encounter a dead end, as the audioParameters() function is non-functional. Functionality needs to be implemented within audioParameters() to handle audio-specific options and parameters.
+
+## Custom Paremter Confirmation
+Currently, the application assumes users entering custom parameters are experienced and provides no safeguards against errors. While it's reasonable to expect advanced users to be familiar with yt-dlp syntax, introducing validation could significantly improve usability. For instance, detecting and notifying users about misspelled or invalid parameters would help catch mistakes early, prevent silent failures, and improve overall reliability.
+
 # Questions
 ## What systems are supported?
-Lua is available for Windows, macOS, and Linux. If you're using Linux or macOS, Lua may already be installed or available through your system's package manager. If not, check the dependencies for installation instructions. While there are Lua apps on the Google Play Store (like Exec Lua) and Apple App Store (such as LuaLu REPL), these won't work for this project due to missing dependencies (LuaRocks, LuaSocket, and yt-dlp with its requirements).
+Lua is available for Windows, macOS, and Linux. If you're using Linux or macOS, Lua may already be installed or available through your system's package manager. If not, check the dependencies for installation instructions. While there are Lua apps on the Google Play Store (like Exec Lua) and Apple App Store (such as LuaLu REPL), I cannot say with assurance that this will work there.
 
 ## Will you ever provide a cloud-based option?
 No, I don't have the resources for that. If you're looking for a cloud-based solution, I'd recommend using [cobalt.tools](https://cobalt.tools/). For obvious reasons, I cannot assure you that everything possible with this yt-dlp wrapper will be directly achievable with Cobalt Tools or that it'll be available at any time.
