@@ -90,6 +90,22 @@ local function silentExecute(cmd)
 end
 
 local function customParamaters()
+
+    while true do
+        print("\nDo you want to add custom options? (y/n):")
+        local input = getUserInput():lower()
+        if input == "y" then
+            print("Moving to custom paramater selection.")
+            break
+        elseif input == "n" then
+            print("Skipping custom parameter selection.")
+            execution()
+            break
+        else
+            print("Please type 'y' or 'n'.")
+        end
+    end
+    
     while true do
         local parameterInput = io.read()
 
@@ -237,6 +253,8 @@ local function videoAdvanced()
 			print("Unrecognized choice. Please enter one of the following: 'auto', 'manual', 'both', or 'none'.")
 		end
         
+        while true do
+        end
 	end
 end
 
@@ -319,7 +337,6 @@ local function videoParameters()
                 print("Please type 'y' or 'n'.")
             end
         end
-        execution()
     end)
 
     -- Start coroutine
