@@ -7,11 +7,14 @@ local selection
 local promptExportType
 local urlInput
 
-local function ytCheck(result)
-    if result ~= 0 then
-        error("Error: Failed to execute yt-dlp command.", 2)
+local function ytCheck(success, exit_type, exit_code)
+    if not success then
+        error("Error: Failed to execute yt-dlp command (runtime error).", 2)
+    elseif exit_type ~= "exit" or exit_code ~= 0 then
+        error("Error: yt-dlp command exited with code ".. tostring(exit_code), 2)
     end
 end
+
 
 local function urlValidation(website)
     -- Parse the URL with LuaSocket
@@ -20,7 +23,7 @@ local function urlValidation(website)
     if not (parsed and parsed.scheme and parsed.host) then
         return "invalid"
     else
-        print("Url parsing succesfull! Checking if url will work with yt-dlp...")
+       print("URL parsing successful! Checking if URL will work with yt-dlp...")
     end
 
     -- Simulate yt-dlp execution using the URL
@@ -49,8 +52,9 @@ end
 
 local function execution()
     local output = table.concat(params, " ")
-    local result = os.execute("yt-dlp -s "..output.." "..inputURL)
-    ytCheck(result)
+    -- local result = os.execute("yt-dlp -s "..output.." "..inputURL)
+    local success, exit_type, exit_code = os.execute("yt-dlp -s " .. output .. " " .. inputURL)
+    ytCheck(success, exit_type, exit_code)
 
     while true do
         print("\nDo you wish to export another "..selection.."?")
@@ -107,7 +111,7 @@ local function getKey(param)
     return param:match("^(%S+)")
 end
 
-local function customParamaters()
+local function customParameters()
     while true do
         print("\nDo you want to add custom options? (y/n):")
         local input = getUserInput():lower()
@@ -268,8 +272,8 @@ local function videoAdvanced()
 
 			print("")
 
-			local result = os.execute("yt-dlp -s --write-auto-subs --sub-format "..format.." "..inputURL)
-            ytCheck(result)
+			local success, exit_type, exit_code = os.execute("yt-dlp -s --write-auto-subs --sub-format "..format.." "..inputURL)
+            ytCheck(success, exit_type, exit_code)
 
 			print("\nDo you want to continue with "..format.. " as the subtitle file format? (y/n):")
 			local confirmation = getUserInput():lower()
@@ -323,6 +327,8 @@ local function videoAdvanced()
         
         while true do
         end
+    customParameters()
+    break
 	end
 end
 
@@ -356,8 +362,8 @@ local function videoParameters()
             
             if input == "list" then
                 print("")
-                local result = os.execute("yt-dlp --list-subs "..inputURL)
-                ytCheck(result)
+                local success, exit_type, exit_code = os.execute("yt-dlp --list-subs "..inputURL)
+                ytCheck(success, exit_type, exit_code)
             else
                 while true do
                     print("\nConfirm selecting " .. input .. " as the subtitle language? (y/n):")
