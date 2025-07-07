@@ -7,18 +7,30 @@ local selection
 local promptExportType
 local urlInput
 
+local function ytCheck(result)
+    if result ~= 0 then
+        error("Error: Failed to execute yt-dlp command.", 2)
+    end
+end
+
 local function urlValidation(website)
     -- Parse the URL with LuaSocket
+    local result
     local parsed = url.parse(website)
     if not (parsed and parsed.scheme and parsed.host) then
         return "invalid"
+    else
+        print("Url parsing succesfull! Checking if url will work with yt-dlp...")
     end
 
     -- Simulate yt-dlp execution using the URL
-    local handle = io.popen("yt-dlp " .. website .. " 2>&1")
-    local result = handle:read("*a")
-    handle:close()
-
+    local handle = io.popen("yt-dlp -s " .. website .. " 2>&1")
+    if handle then
+        result = handle:read("*a")
+        handle:close()
+    else
+        error("Error: Failed to execute yt-dlp command.", 2)
+    end
     local status
     local lower_result = result:lower()
     -- Check for DRM protection, excluding YouTube
@@ -37,7 +49,8 @@ end
 
 local function execution()
     local output = table.concat(params, " ")
-    os.execute("yt-dlp -s "..output.." "..inputURL)
+    local result = os.execute("yt-dlp -s "..output.." "..inputURL)
+    ytCheck(result)
 
     while true do
         print("\nDo you wish to export another "..selection.."?")
@@ -255,7 +268,8 @@ local function videoAdvanced()
 
 			print("")
 
-			os.execute("yt-dlp -s --write-auto-subs --sub-format "..format.." "..inputURL)
+			local result = os.execute("yt-dlp -s --write-auto-subs --sub-format "..format.." "..inputURL)
+            ytCheck(result)
 
 			print("\nDo you want to continue with "..format.. " as the subtitle file format? (y/n):")
 			local confirmation = getUserInput():lower()
@@ -342,7 +356,8 @@ local function videoParameters()
             
             if input == "list" then
                 print("")
-                os.execute("yt-dlp --list-subs "..inputURL)
+                local result = os.execute("yt-dlp --list-subs "..inputURL)
+                ytCheck(result)
             else
                 while true do
                     print("\nConfirm selecting " .. input .. " as the subtitle language? (y/n):")
@@ -524,8 +539,6 @@ local function displayWelcomeMessage()
 
 	promptExportType()
 end
-
-customParamaters()
 
 print("\nChecking to see if yt-dlp is accessible...")
 
