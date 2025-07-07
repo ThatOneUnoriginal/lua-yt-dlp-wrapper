@@ -89,6 +89,11 @@ local function silentExecute(cmd)
 	end
 end
 
+local function getKey(param)
+    -- Extract the key part of the parameter, assuming it's the first word (up to first space)
+    return param:match("^(%S+)")
+end
+
 local function customParamaters()
 
     while true do
@@ -105,34 +110,62 @@ local function customParamaters()
             print("Please type 'y' or 'n'.")
         end
     end
-    
+    print("\nEnter a custom parameter:")
     while true do
+
+        print("Type 'list' to view all selected parameters.")
+        print("Type 'del {parameter}' to remove a parameter.\n")
+    
         local parameterInput = io.read()
 
         for param in parameterInput:gmatch("[^,]+") do
             local trimmedParam = param:match("^%s*(.-)%s*$")
             local isDelete = trimmedParam:sub(1, 4) == "del "
+            local isList = trimmedParam:sub(1,5) == "list"
             local actualParam = isDelete and trimmedParam:sub(5):match("^%s*(.-)%s*$") or trimmedParam
             local found = false
 
+            -- Find if parameter with the same key exists
+            local paramKey = getKey(actualParam)
+
             for i, v in ipairs(params) do
-                if v == actualParam then
+                local existingKey = getKey(v)
+                if existingKey == paramKey then
                     found = true
                     if isDelete then
+                        -- Remove the matching parameter
                         table.remove(params, i)
-                        print("'" .. actualParam .. "' removed from selection.")
+                        print("'" .. actualParam .. "' removed from selection.\n")
+                    elseif isList then
+                        -- For list command you can print params later, do nothing here
                     else
-                        print("'" .. actualParam .. "' is already in the selection. Use 'del " .. actualParam .. "' to remove it.")
+                        if v == actualParam then
+                            -- Parameter already exists exactly
+                            print("'" .. actualParam .. "' already exists. Type 'del " .. actualParam .. "' to remove it.\n")
+                        else
+                            -- Replace existing param with new one
+                            params[i] = actualParam
+                            print("'" .. actualParam .. "' replaced the old '" .. v .. "'.\n")
+                        end
                     end
                     break
                 end
             end
 
-            if not found and not isDelete then
+
+            -- If no param with same key found and not delete or list, add new param
+            if not found and not isDelete and not isList then
                 table.insert(params, actualParam)
-                print("'" .. actualParam .. "' added to selection.")
-            elseif not found and isDelete then
-                print("'" .. actualParam .. "' not found in the selection.")
+                print("'" .. actualParam .. "' added to selection.\n")
+            elseif not found and isDelete and not isList then
+                print("'" .. actualParam .. "' not found in the selection.\n")
+            elseif isList then
+                if #params == 0 then
+                    print("\nNo parameters have been selected.\n")
+                else
+                    print("\nSelected parameters: "..(table.concat(params, ", ")))
+                    print("")
+                end
             end
         end
     end
@@ -470,6 +503,8 @@ local function displayWelcomeMessage()
 
 	promptExportType()
 end
+
+customParamaters()
 
 print("\nChecking to see if yt-dlp is accessible...")
 
