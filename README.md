@@ -14,8 +14,9 @@ Since yt-dlp is a core dependency without which the application cannot function,
 ## Finish audioParameters
 Currently, if a user selects the option to export audio, they encounter a dead end, as the audioParameters() function is non-functional. Functionality needs to be implemented within audioParameters() to handle audio-specific options and parameters.
 
-## Custom Paremter Confirmation
-Currently, the application assumes users entering custom parameters are experienced and provides no safeguards against errors. While it's reasonable to expect advanced users to be familiar with yt-dlp syntax, introducing validation could significantly improve usability. For instance, detecting and notifying users about misspelled or invalid parameters would help catch mistakes early, prevent silent failures, and improve overall reliability.
+## ~~Custom Paremter Confirmation~~
+Function readded in commit [5c879fb](https://github.com/ThatOneUnoriginal/lua-yt-dlp-wrapper/commit/5c879fbb29f7e961755d14bbb1b7aef506e5144d)
+~~Currently, the application assumes users entering custom parameters are experienced and provides no safeguards against errors. While it's reasonable to expect advanced users to be familiar with yt-dlp syntax, introducing validation could significantly improve usability. For instance, detecting and notifying users about misspelled or invalid parameters would help catch mistakes early, prevent silent failures, and improve overall reliability.~~
 
 # Questions
 ## What systems are supported?

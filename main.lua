@@ -1,6 +1,8 @@
 local helper = require("utils.helper")
 local config = require("config")
 
+-- dofile("core/settings.lua")
+
 print("\nChecking to see if yt-dlp is accessible...")
 
 if helper.silentEX("yt-dlp --version") == 1 then
