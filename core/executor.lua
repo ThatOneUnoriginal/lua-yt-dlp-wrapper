@@ -7,7 +7,7 @@ local selection = config.selection
 
 local output = table.concat(params, " ")
 -- local result = os.execute("yt-dlp -s "..output.." "..inputURL)
-local success, exit_type, exit_code = os.execute("yt-dlp -s " .. output .. " " .. inputURL)
+local success = os.execute("yt-dlp " .. output .. " " .. inputURL)
 ytCheck(success)
 
 while true do

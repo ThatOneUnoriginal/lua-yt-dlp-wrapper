@@ -1,7 +1,7 @@
 local M = {}
 local co = nil
 local helper = require("utils.helper")
-local default = require("settings")
+-- local default = require("utils.settings")
 local getUserInput = helper.getUserInput
 local config = require("config")
 local params = config.params

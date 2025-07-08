@@ -111,11 +111,11 @@ local co =
 
             if input == "y" then
                 print("Moving to advanced video parameter selection.")
-                videoAdvanced()
+                dofile("core/audio/advancedAudio.lua")
                 break
             elseif input == "n" then
-                print("Skipping advanced video parameter selection.")
-                execution()
+                print("Skipping advanced video parameter selection.\n")
+                dofile("core/executor.lua")
                 break
             else
                 print("Please type 'y' or 'n'.")
