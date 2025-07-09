@@ -8,7 +8,7 @@ local selection = config.selection
 print("\nRunning the yt-dlp command with the following parameters:")
 print(table.concat(params, "\n"))
 print("If you're downloading a long " .. selection .. ", the conversion process may take some time.")
-print("Unconverted files will appear in the download folder during this process—please avoid interacting with them, as it could disrupt the conversion.")
+print("Unconverted files will appear in the download folder during this process. Please avoid interacting with them, as it could disrupt the conversion.")
 print("Note: Files are saved with the original upload date as their creation date, so they might not show up at the top of your Downloads folder if you're sorting by date.")
 
 local output = table.concat(params, " ")
