@@ -1,4 +1,10 @@
-package.path = package.path .. ";../libraries/?.lua"
+local sep = package.config:sub(1,1)
+local script_path = debug.getinfo(1, "S").source:sub(2)
+if sep == "\\" then
+    script_path = script_path:gsub("\\", "/")
+end
+local dir = script_path:match("(.*/)")
+package.path = package.path .. ";" .. dir .. "../libraries/?.lua"
 local json = require("dkjson")
 local filename = "settings.json"
 

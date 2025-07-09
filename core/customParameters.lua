@@ -15,7 +15,7 @@ while true do
         dofile("core/executor.lua")
         return
     else
-        print("Please type 'y' or 'n'.")
+        helper.beg(input)
     end
 end
 

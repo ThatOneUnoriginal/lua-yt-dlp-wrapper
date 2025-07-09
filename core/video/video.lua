@@ -27,7 +27,7 @@ local co =
                 print("Subtitles will not be embedded into the video.")
                 break
             else
-                print("Please type 'y' or 'n'.")
+                helper.beg(input)
             end
         end
 
@@ -74,7 +74,7 @@ local co =
                         elseif confirmation == "n" then
                             break
                         else
-                            print("Please type 'y' or 'n'.")
+                            helper.beg(confirmation)
                         end
                     end
                 end
@@ -97,7 +97,7 @@ local co =
             elseif input == "n" then
                 break
             else
-                print("Please type 'y' or 'n'.")
+                helper.beg(input)
             end
         end
 
@@ -118,7 +118,7 @@ local co =
                 dofile("core/executor.lua")
                 break
             else
-                print("Please type 'y' or 'n'.")
+                helper.beg(input)
             end
         end
     end

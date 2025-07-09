@@ -1,7 +1,7 @@
 local helper = require("utils.helper")
 local config = require("config")
 
--- dofile("core/settings.lua")
+dofile("utils/settings.lua")
 
 print("\nChecking to see if yt-dlp is accessible...")
 

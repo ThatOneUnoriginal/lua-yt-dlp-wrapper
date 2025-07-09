@@ -1,5 +1,25 @@
 -- lib/silentEX.lua
 local M = {}
+local horse = 0
+
+function M.beg(v)
+    if v == "horse" then
+        horse = horse + 1
+        if horse >= 30 then
+            print("I give up... horse")
+            os.exit()
+        elseif horse >= 20 then
+            return print("You understand this is a wrapper for yt-dlp? Repeating 'horse' is useless. JUST INPUT 'y' OR 'n'.")
+        elseif horse >= 10 then
+            return print("Why are you so amused in inputting horse? PLEASE just input 'y' or 'n'.")
+        elseif horse >= 5 then
+            return print("PLEASE input 'y' or 'n'.")
+        end
+    else
+        horse = 0
+    end
+    return print("Please input 'y' or 'n'.")
+end
 
 function M.silentEX(cmd)
     local isWindows = package.config:sub(1, 1) == "\\"

@@ -4,6 +4,7 @@ local helper = require("utils.helper")
 -- local default = require("utils.settings")
 local getUserInput = helper.getUserInput
 local config = require("config")
+local default = require("utils.settings")
 local params = config.params
 
 -- Store the coroutine reference
@@ -24,7 +25,7 @@ function M.sharedParameters()
         elseif input == "n" then
             break
         else
-            print("Please type 'y' or 'n'.")
+            helper.beg()
         end
     end
 
@@ -39,34 +40,33 @@ function M.sharedParameters()
         elseif input == "n" then
             break
         else
-            print("Please type 'y' or 'n'.")
+            helper.beg()
         end
     end
 
-   --[[ while true do
-        print("\nWhere would you like the videos to download? Enter nothing for default. Default is "..default.download_folder)
+    while true do
+        local location = default.findDefault("download-folder")
+        print("\nWhere would you like the videos to download? Enter nothing for default. Default is "..location)
         local input = getUserInput()
-        if input == "" or input == default.downloads_folder then
-            print("Default selected: your media will download to "..default.download_folder)
+        if input == " " or input == location then
+            print("Default selected: your media will download to "..location)
             table.insert(params, "--P "..input)
             break
-        elseif input ~= default.downloads_folder then
-            while true do
-                print("You've selected to download to a folder that is not the default ("..default.downloads_folder..").")
-                print("Would you like to make "..input.." your new default download location? (y/n):")
-            
-                local input = getUserInput()
-                if input == "y" then
-                    default.downloads_folder = input
-                    table.insert(params, "--P "..input)
-                    break
-                elseif input == "n" then
-                    table.insert(params, "--P "..input)
-                    break
-                end
+        elseif input ~= location then
+            print("\nYou've selected to download to a folder that is not the default ("..location..").")
+            print("Would you like to make "..input.." your new default download location? (y/n):")
+            local confirmation = getUserInput()
+            if confirmation == "y" then
+                default.saveNewDefault("download-folder", input)
+                table.insert(params, "--P "..input)
+                break
+            elseif input == "n" then
+                table.insert(params, "-P "..input)
+            else
+                helper.beg()
             end
         end
-    end ]]
+    end
 
     -- Resume coroutine after shared params
     if coroutine.status(co) == "suspended" then

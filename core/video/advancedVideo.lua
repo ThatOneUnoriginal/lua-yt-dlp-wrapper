@@ -44,7 +44,7 @@ local function subtitleFormatting()
             elseif confirmation == "n" then
                 break
             else
-                print("Please type 'y' or 'n'.")
+                helper.beg(confirmation)
             end
         end
     end

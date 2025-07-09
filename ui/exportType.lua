@@ -3,7 +3,7 @@ local config = require("config")
 
 local selection
 local function urlInput()
-    dofile("ui/urlInput")
+    dofile("ui/urlInput.lua")
 end
 
 while true do
