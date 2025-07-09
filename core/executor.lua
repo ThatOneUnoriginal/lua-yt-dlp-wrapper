@@ -17,23 +17,28 @@ ytCheck(success)
 
 while true do
     print("\nDo you wish to export another " .. selection .. "?")
-    print(" 1) Export again (don't change export type).")
-    print(" 2) Export again (allow me to choose export type again).")
-    print(" 3) Close application / no thanks.\n")
+    print(" 1) Export again (keep export type, reselect parameters).")
+    print(" 2) Export again (keep export type, keep parameters).")
+    print(" 3) Export again (reselect export type).")
+    print(" 4) Close application / no thanks.\n")
 
     local input = io.read()
     if input == "1" then
         print("")
         dofile("ui/urlInput.lua")
+        config.keepParams = false
         break
     elseif input == "2" then
+        config.keepParams = true
+        dofile("ui/urlInput.lua")
+    elseif input == "3" then
         print("")
         dofile("ui/exportType.lua")
         break
-    elseif input == "3" then
+    elseif input == "4" then
         print("\nExiting program......")
         os.exit()
     else
-        print("Please type 1, 2 or 3.")
+        print("Please type 1, 2, 3, or 4.")
     end
 end

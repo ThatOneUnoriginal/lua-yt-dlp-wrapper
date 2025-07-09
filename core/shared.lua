@@ -58,11 +58,11 @@ function M.sharedParameters()
 
         if input == "" then
             print("Default selected: your media will download to " .. location)
-            table.insert(params, "-P " .. location)
+            table.insert(params, '-P "' .. location .. '"')
             break
         elseif input == location then
             print("You entered the default folder. Proceeding with default location.")
-            table.insert(params, "-P " .. location)
+            table.insert(params, '-P "' .. location .. '"')
             break
         else
             print("\nYou've selected to download to a folder that is not the default (" .. location .. ").")
@@ -72,10 +72,11 @@ function M.sharedParameters()
 
             if confirmation == "y" then
                 default.saveNewDefault("download-folder", input)
-                table.insert(params, "-P " .. input)
+                table.insert(params, '-P "' .. input .. '"')
                 break
             elseif confirmation == "n" then
-                table.insert(params, "-P " .. input)
+                table.insert(params, '-P "' .. input .. '"')
+                
                 break
             else
                 helper.beg()  -- This seems like a custom function for re-prompting or showing help
@@ -96,7 +97,7 @@ function M.sharedParameters()
 
         if input == "y" or input == "" then
             print("Default selected: using exclusion file at " .. location)
-            table.insert(params, "--download-archive " .. location)
+            table.insert(params, '--download-archive "' .. location .. '"')
             break
 
         elseif input == "n" then
@@ -114,10 +115,10 @@ function M.sharedParameters()
                 confirmation = confirmation:match("^%s*(.-)%s*$")  -- trim 
                 if confirmation == "y" then
                     default.saveNewDefault("exclusion-folder", input)
-                    table.insert(params, "--download-archive " .. input)
+                    table.insert(params, '--download-archive "' .. input .. '"')
                     break
                 elseif confirmation == "n" then
-                    table.insert(params, "--download-archive " .. input)
+                    table.insert(params, '--download-archive "' .. input .. '"')
                     break
                 else
                     helper.beg()
@@ -132,7 +133,7 @@ function M.sharedParameters()
     if co and coroutine.status(co) == "suspended" then
         coroutine.resume(co)
     else
-        
+            
     end
 end
 

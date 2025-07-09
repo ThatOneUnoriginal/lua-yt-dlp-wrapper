@@ -18,7 +18,11 @@ while true do
         -- URLs are invalid for reasons specififed in the urlValidation
         print("Valid URL.")
         config.inputURL = inputURL
-        dofile('ui/formatType.lua')
+        if config.keepParams == "true" then
+            dofile('core/executor.lua')
+        else
+            dofile('ui/formatType.lua')
+        end
         break
     elseif status == "invalid" then
         print("Invalid URL. Please enter a valid URL.")
