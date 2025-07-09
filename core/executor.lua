@@ -12,7 +12,6 @@ print("Unconverted files will appear in the download folder during this process.
 print("Note: Files are saved with the original upload date as their creation date, so they might not show up at the top of your Downloads folder if you're sorting by date.")
 
 local output = table.concat(params, " ")
--- local result = os.execute("yt-dlp -s "..output.." "..inputURL)
 local success = os.execute("yt-dlp " .. output .. " " .. inputURL)
 ytCheck(success)
 
@@ -25,11 +24,11 @@ while true do
     local input = io.read()
     if input == "1" then
         print("")
-        dofile("ui/urlInput")
+        dofile("ui/urlInput.lua")
         break
     elseif input == "2" then
         print("")
-        dofile("ui/exportType")
+        dofile("ui/exportType.lua")
         break
     elseif input == "3" then
         print("\nExiting program......")
