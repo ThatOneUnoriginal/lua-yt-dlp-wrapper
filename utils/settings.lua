@@ -3,6 +3,16 @@ local script_path = debug.getinfo(1, "S").source:sub(2)
 if sep == "\\" then
     script_path = script_path:gsub("\\", "/")
 end
+
+local cwd = io.popen(sep == "\\" and "cd" or "pwd"):read("*l") or ""
+if sep == "\\" then
+    cwd = cwd:gsub("\\", "/")
+end
+
+if not script_path:match("^/") and not script_path:match("^%a:/") then
+    script_path = cwd .. "/" .. script_path
+end
+
 local dir = script_path:match("(.*/)")
 package.path = package.path .. ";" .. dir .. "../libraries/?.lua"
 local json = require("dkjson")
@@ -16,10 +26,8 @@ local function createEmptySettingsFile()
 end
 
 local function loadSettings()
-    -- Try open file; if missing create it
     local f = io.open(filename, "r")
     if not f then
-        print(filename .. " doesn't exist, creating new settings file.")
         createEmptySettingsFile()
         f = io.open(filename, "r")
         if not f then error("Failed to open " .. filename .. " after creating") end
@@ -28,26 +36,29 @@ local function loadSettings()
     local content = f:read("*all")
     f:close()
 
-    -- If empty or nil, recreate file and reload content
     if not content or content == "" then
-        print(filename .. " is empty, resetting.")
         createEmptySettingsFile()
         content = "{}"
     end
 
-    -- Decode JSON safely, try recover if invalid JSON
     local t, pos, err = json.decode(content)
     if not t then
-        print("Warning: corrupted JSON in " .. filename .. ", resetting file.")
         createEmptySettingsFile()
         t = {}
     end
 
-    -- Defaults
+    local base_dir = dir:gsub("(.*)/$", "%1")
+    local parent_dir = base_dir:match("(.*)/")
+    if not parent_dir or parent_dir == "" then
+        parent_dir = base_dir
+    end
+
+    local exclusion_path = parent_dir .. "/exclusion.txt"
+
     if t["exclusion-folder"] == nil then
-        t["exclusion-folder"] = "exclusion.txt"
-        local ef = io.open("exclusion.txt", "w")
-        if not ef then error("Failed to create exclusion.txt") end
+        t["exclusion-folder"] = exclusion_path
+        local ef = io.open(t["exclusion-folder"], "w")
+        if not ef then error("Failed to create " .. t["exclusion-folder"]) end
         ef:close()
     end
 
@@ -73,22 +84,17 @@ local function loadSettings()
         t["download-folder"] = getDownloadsFolder()
     end
 
-    -- Save updated settings
     local updated_json = json.encode(t, { indent = true })
     local fw = io.open(filename, "w")
     if not fw then error("Failed to open file for writing: " .. filename) end
     fw:write(updated_json)
     fw:close()
 
-    print("Settings loaded and saved.")
-
     return t
 end
 
--- Call it once to initialize/load settings
 local t = loadSettings()
 
--- Module and function to retrieve values
 local M = {}
 function M.findDefault(key)
     if not key or type(key) ~= "string" then

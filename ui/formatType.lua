@@ -35,10 +35,21 @@ end
 
 while true do
     print("\nEnter the desired export format (requires ffmpeg). Type 'quit' to exit program:")
+    print("\nExporting can require some time to process locally, to avoid formatting, type 'skip'")
     print("Available " .. selection .. " formats: " .. table.concat(validFormats, ", "))
     local isValid = false
     local isInvalid = false
     local chosenFormat = getUserInput():lower()
+
+    if chosenFormat == "skip" then
+        if selection == "audio" then
+            audio()
+            break
+        else
+            video()
+            break
+        end
+    end
 
     for _, format in pairs(validFormats) do
         if chosenFormat == format then

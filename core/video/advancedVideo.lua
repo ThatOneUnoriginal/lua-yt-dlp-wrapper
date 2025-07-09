@@ -4,8 +4,7 @@ local params = config.params
 local inputURL = config.inputURL
 local getUserInput = helper.getUserInput
 local ytCheck = helper.ytCheck
-    
-    
+
 local subFormats = {"vtt", "srt", "ttml", "json3", "srv1", "srv2", "srv3"}
 -- Only happens IF the user chooses to download subtitles into a seperate file
 local function subtitleFormatting()
