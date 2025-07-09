@@ -85,6 +85,9 @@ local function loadSettings()
     end
 
     local updated_json = json.encode(t, { indent = true })
+    if type(updated_json) ~= "string" then
+        error("Failed to encode JSON settings")
+    end
     local fw = io.open(filename, "w")
     if not fw then error("Failed to open file for writing: " .. filename) end
     fw:write(updated_json)
@@ -109,10 +112,14 @@ function M.saveNewDefault(key, value)
     end
     t[key] = value
     local updated_json = json.encode(t, { indent = true })
+    if type(updated_json) ~= "string" then
+        error("Failed to encode JSON settings")
+    end
     local fw = io.open(filename, "w")
     if not fw then error("Failed to open file for writing: " .. filename) end
     fw:write(updated_json)
     fw:close()
+
 end
 
 return M
