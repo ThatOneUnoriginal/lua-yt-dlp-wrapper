@@ -132,7 +132,7 @@ function M.sharedParameters()
     if co and coroutine.status(co) == "suspended" then
         coroutine.resume(co)
     else
-        print("Coroutine not suspended or already completed.")
+        
     end
 end
 

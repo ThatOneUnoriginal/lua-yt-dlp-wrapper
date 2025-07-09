@@ -39,3 +39,5 @@ coroutine.resume(co)
 
 -- Run shared parameters (resumes the coroutine after)
 shared.sharedParameters()
+
+dofile("core/customParameters.lua")
