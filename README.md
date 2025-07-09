@@ -53,4 +53,4 @@ If installed correctly, this will display the help menu.
 While **yt-dlp** has its own dependencies, the Lua wrapper does not directly require them. However, for full functionality (e.g., merging video/audio streams or post-processing), I recommend installing:  
 - **FFmpeg** (includes `ffprobe`)  
 
-For a complete list of **yt-dlp** dependencies, check the [official repository](https://github.com/ThatOneUnoriginal/lua-yt-dlp-wrapper).
+For a complete list of **yt-dlp** dependencies, check the [official repository](https://github.com/yt-dlp/yt-dlp#dependencies).
