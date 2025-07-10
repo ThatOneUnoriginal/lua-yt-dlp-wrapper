@@ -34,20 +34,12 @@ local co =
 
                 if input == "list" then
                     local result
-                    print("banana")
                     -- Loop will repeat without setting done = true
                     print("")
-                    print("banana2")
-                    print(inputURL)
-                    print(config.inputURL)
                     local command = 'yt-dlp --list-subs "' .. inputURL .. '"'
-                    print("banana 2.5")
                     local success = io.popen(command)
-                    print("banana3")
                     ytCheck(success)
-                    print("banana4")
                     if success then
-                        print("banana5")
                         result = success:read("*a")
                         print(result)
                         success:close()
