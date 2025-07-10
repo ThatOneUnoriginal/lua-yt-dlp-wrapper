@@ -1,5 +1,11 @@
-local helper = require("utils.helper")
-local config = require("config")
+_G.helper = require("utils.helper")
+_G.shared = require("core.shared")
+_G.config = require("config")
+_G.selection = config["selection"]
+_G.params = config["params"]
+_G.inputURL = config["inputURL"]
+_G.getUserInput = helper["getUserInput"]
+_G.ytCheck = helper["ytCheck"]
 
 dofile("utils/settings.lua")
 

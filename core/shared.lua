@@ -1,11 +1,5 @@
 local M = {}
 local co = nil
-local helper = require("utils.helper")
--- local default = require("utils.settings")
-local getUserInput = helper.getUserInput
-local config = require("config")
-local default = require("utils.settings")
-local params = config.params
 
 -- Store the coroutine reference
 function M.setCoroutine(coroutineObj)

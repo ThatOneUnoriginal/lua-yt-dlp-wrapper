@@ -1,10 +1,3 @@
-local helper = require("utils.helper")
-local config = require("config")
-local ytCheck = helper.ytCheck
-local params = config.params
-local inputURL = config.inputURL
-local selection = config.selection
-
 print("\nRunning the yt-dlp command with the following parameters:")
 print(table.concat(params, "\n"))
 print("If you're downloading a long " .. selection .. ", the conversion process may take some time.")

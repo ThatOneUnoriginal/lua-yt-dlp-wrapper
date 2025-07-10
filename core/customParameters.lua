@@ -1,7 +1,3 @@
-local helper = require("utils.helper")
-local getUserInput = helper.getUserInput
-local config = require("config")
-local params = config.params
 local getKey = helper.getKey
 
 while true do
