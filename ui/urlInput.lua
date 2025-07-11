@@ -16,7 +16,7 @@ while true do
     if status == "valid" then
         -- URLs are invalid for reasons specififed in the urlValidation
         print("Valid URL.")
-        inputURL = input 
+        inputURL = input
         print(inputURL)
         if config.keepParams == "true" then
             dofile('core/executor.lua')

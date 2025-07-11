@@ -42,7 +42,7 @@ function M.sharedParameters()
     end
 
     while true do
-        local location = default.findDefault("download-folder")
+        local location = findDefault("download-folder")
         print("\nWhere would you like the media to download? Enter nothing for default. Default is: " .. location)
 
         local input = getUserInput()
@@ -65,7 +65,7 @@ function M.sharedParameters()
             local confirmation = getUserInput()
 
             if confirmation == "y" then
-                default.saveNewDefault("download-folder", input)
+                saveNewDefault("download-folder", input)
                 table.insert(params, '-P "' .. input .. '"')
                 break
             elseif confirmation == "n" then
@@ -80,7 +80,7 @@ function M.sharedParameters()
 
 
     while true do
-        local location = default.findDefault("exclusion-folder")
+        local location = findDefault("exclusion-folder")
         print("\nWhere would you like the exclusion folder to be? Enter nothing for default.")
         print("Default is: " .. location)
         print("Note: An exclusion folder helps yt-dlp skip files it has already downloaded.")
@@ -108,7 +108,7 @@ function M.sharedParameters()
                 local confirmation = getUserInput()
                 confirmation = confirmation:match("^%s*(.-)%s*$")  -- trim 
                 if confirmation == "y" then
-                    default.saveNewDefault("exclusion-folder", input)
+                    saveNewDefault("exclusion-folder", input)
                     table.insert(params, '--download-archive "' .. input .. '"')
                     break
                 elseif confirmation == "n" then

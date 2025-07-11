@@ -19,10 +19,10 @@ while true do
     if input == "1" then
         print("")
         dofile("ui/urlInput.lua")
-        config.keepParams = false
+        keepParams = false
         break
     elseif input == "2" then
-        config.keepParams = true
+        keepParams = true
         dofile("ui/urlInput.lua")
     elseif input == "3" then
         print("")
