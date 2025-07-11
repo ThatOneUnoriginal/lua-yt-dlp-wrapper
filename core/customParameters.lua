@@ -1,7 +1,3 @@
-local helper = require("utils.helper")
-local getUserInput = helper.getUserInput
-local config = require("config")
-local params = config.params
 local getKey = helper.getKey
 
 while true do
@@ -23,6 +19,7 @@ print("\nEnter a custom parameter:")
 while true do
     print("Type 'list' to view all selected parameters.")
     print("Type 'del {parameter}' to remove a parameter.\n")
+    print("Type 'done' to review all selected parameters and move onto execution.")
 
     local parameterInput = io.read()
     local trimmedInput = parameterInput:match("^%s*(.-)%s*$")
@@ -53,6 +50,22 @@ while true do
 
             if not found then
                 print("'" .. actualParam .. "' not found in the selection.\n")
+            end
+        end
+    elseif parameterInput == "done" then
+        while true do
+            print("Are you sure you are finished selecting your parameters?")
+            print("These are the parameters you've selected along with parameters added in previous steps:")
+            print("\nSelected parameters: " .. table.concat(params, ", ") .. "\n")
+
+            local input = getUserInput():lower()
+            if input == "y" then
+                dofile('core/executor.lua')
+                break
+            elseif input == "n" then
+                break
+            else
+                helper.beg()
             end
         end
     else

@@ -1,13 +1,3 @@
-local shared = require("core.shared")
-local helper = require("utils.helper")
-local getUserInput = helper.getUserInput
-local config = require("config")
-local params = config.params
-local inputURL = config.inputURL
-local ytCheck = helper.ytCheck
-local videoAdvanced = helper.videoAdvanced
-local execution = helper.execution
-
 -- Create coroutine
 local co =
     coroutine.create(
@@ -46,7 +36,8 @@ local co =
                     local result
                     -- Loop will repeat without setting done = true
                     print("")
-                    local success = io.popen("yt-dlp --list-subs " .. inputURL)
+                    local command = 'yt-dlp --list-subs "' .. inputURL .. '"'
+                    local success = io.popen(command)
                     ytCheck(success)
                     if success then
                         result = success:read("*a")
@@ -60,7 +51,6 @@ local co =
                         table.remove(params)
                         break
                     end
-
                 else
                     while true do
                         print("\nConfirm selecting " .. input .. " as the subtitle language? (y/n):")

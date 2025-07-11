@@ -1,23 +1,23 @@
-local inputURL
+local input
 local inputCheck = require('core.validator')
-local config = require("config")
 
 while true do
     print("\nEnter the URL that you're wanting to export (type 'quit' to exit):")
-    inputURL = io.read()
+    input = io.read()
 
-    if inputURL:lower() == "quit" then
+    if input:lower() == "quit" then
         print("Exiting program....")
     else
         print("Validating URL, this may take a couple minutes...")
     end
 
-    local status = inputCheck.urlValidation(inputURL)
+    local status = inputCheck.urlValidation(input)
 
     if status == "valid" then
         -- URLs are invalid for reasons specififed in the urlValidation
         print("Valid URL.")
-        config.inputURL = inputURL
+        inputURL = input
+        print(inputURL)
         if config.keepParams == "true" then
             dofile('core/executor.lua')
         else

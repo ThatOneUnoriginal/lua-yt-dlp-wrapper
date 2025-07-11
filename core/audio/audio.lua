@@ -1,14 +1,3 @@
-local shared = require("core.shared")
-local helper = require("utils.helper")
-local getUserInput = helper.getUserInput
-local config = require("config")
-local params = config.params
-local inputURL = config.inputURL
-local ytCheck = helper.ytCheck
-local videoAdvanced = helper.videoAdvanced
-local execution = helper.execution
-
-
 local co =
     coroutine.create(function ()
         while true do

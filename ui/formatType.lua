@@ -1,8 +1,3 @@
-local helper = require("utils.helper")
-local config = require("config")
-local selection = config.selection
-local params = config.params
-local getUserInput = helper.getUserInput
 local function video()
     dofile('core/video/video.lua')
 end
